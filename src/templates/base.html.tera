@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    // Runs synchronously, before first paint, so the page never flashes the wrong theme.
+    (function () {
+      var stored = localStorage.getItem('mkcdoc-theme');
+      var theme = stored || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <title>{% block title %}{{ site_name }}{% endblock title %}</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #57606a;
+      --muted-subtle: #888888;
+      --border: #e2e2e2;
+      --link: #0550ae;
+      --code-bg: #f6f8fa;
+      --shadow: rgba(0, 0, 0, 0.08);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      /* No-JS fallback: honored only until the early script above sets data-theme explicitly,
+         which the attribute selectors below then take over from (they win on specificity). */
+      :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --muted-subtle: #6e7681; --border: #30363d; --link: #6cb6ff; --code-bg: #161b22; --shadow: rgba(0, 0, 0, 0.5); color-scheme: dark; }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --muted-subtle: #6e7681; --border: #30363d; --link: #6cb6ff; --code-bg: #161b22; --shadow: rgba(0, 0, 0, 0.5);
+      color-scheme: dark;
+    }
+    :root[data-theme="light"] {
+      --bg: #ffffff; --fg: #1a1a1a; --muted: #57606a; --muted-subtle: #888888; --border: #e2e2e2; --link: #0550ae; --code-bg: #f6f8fa; --shadow: rgba(0, 0, 0, 0.08);
+      color-scheme: light;
+    }
+
+    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; color: var(--fg); background: var(--bg); }
+    a { color: var(--link); }
+    .topnav { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .topnav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem; padding: 0.75rem 1.5rem; }
+    .topnav .site-name { font-weight: 700; color: var(--fg); text-decoration: none; margin-right: auto; }
+    .topnav-inner > ul { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; }
+    .topnav li { position: relative; }
+    .topnav-inner > ul > li > a, .topnav .nav-trigger {
+      color: var(--fg); text-decoration: none; padding: 0.4rem 0; display: inline-block; cursor: default;
+    }
+    .topnav a:hover, .topnav .nav-trigger:hover { color: var(--link); }
+    .topnav .caret { font-size: 0.65em; }
+    .topnav .dropdown {
+      /* No gap (margin: 0) between the trigger and this box: a gap would be a dead zone the
+         cursor has to cross without hovering anything, which closes the dropdown before the
+         mouse arrives. The visual breathing room instead comes from padding-top, which is still
+         part of this element's own hoverable area. */
+      display: none; position: absolute; top: 100%; left: 0; margin: 0;
+      padding: 0.65rem 0.4rem 0.4rem;
+      list-style: none; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    .topnav li.has-children:hover .dropdown,
+    .topnav li.has-children:focus-within .dropdown { display: block; }
+    .topnav .dropdown li { margin: 0; }
+    .topnav .dropdown a { display: block; padding: 0.35rem 0.6rem; border-radius: 6px; }
+    .topnav .dropdown a:hover { background: var(--code-bg); }
+    .theme-toggle {
+      background: none; border: 1px solid var(--border); border-radius: 6px; width: 2rem; height: 2rem;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--fg); flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--link); color: var(--link); }
+    .theme-toggle svg { width: 1rem; height: 1rem; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    main.content { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    main.content.content-wide { max-width: 1100px; }
+    .api-layout { display: flex; align-items: flex-start; gap: 2.5rem; }
+    .api-toc { width: 200px; flex-shrink: 0; position: sticky; top: 4.5rem; max-height: calc(100vh - 5.5rem); overflow-y: auto; }
+    .api-toc .toc-heading { font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem; }
+    .api-toc ul { list-style: none; margin: 0; padding: 0; }
+    .api-toc li { margin: 0.1rem 0; }
+    .api-toc a { color: var(--fg); text-decoration: none; display: block; padding: 0.2rem 0; font-family: ui-monospace, monospace; font-size: 0.85rem; word-break: break-all; }
+    .api-toc a:hover { color: var(--link); }
+    .api-body { flex: 1; min-width: 0; }
+    .file-group { margin-top: 2.5rem; }
+    .file-group:first-child { margin-top: 0; }
+    .file-group h2.file-heading { font-family: ui-monospace, monospace; font-size: 1.15rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border); scroll-margin-top: 4.5rem; }
+    h1 { border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+    h2.section, h3.section { margin-top: 2.5rem; color: var(--muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
+    .item { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; scroll-margin-top: 4.5rem; }
+    .item h4 { margin: 0 0 0.25rem; font-family: ui-monospace, monospace; font-size: 1.1rem; }
+    .item .loc { color: var(--muted-subtle); font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .item pre { background: var(--code-bg); padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+    .item .brief { font-weight: 600; }
+    .item table { border-collapse: collapse; margin-top: 0.5rem; }
+    .item td { padding: 0.15rem 0.75rem 0.15rem 0; vertical-align: top; }
+    .item td.mname { font-family: ui-monospace, monospace; color: var(--link); white-space: nowrap; }
+    .item td.mtype { font-family: ui-monospace, monospace; color: var(--muted); white-space: nowrap; }
+    main.content pre { background: var(--code-bg); padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+    main.content code { background: var(--code-bg); padding: 0.1rem 0.3rem; border-radius: 4px; }
+    main.content pre.mermaid { background: transparent; padding: 0; text-align: center; overflow-x: auto; }
+    main.content img { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="topnav-inner">
+      <a class="site-name" href="index.html">{{ site_name }}</a>
+      <ul>
+        {% for item in nav %}
+        <li{% if item.kind == "section" %} class="has-children" tabindex="0"{% endif %}>
+          {% if item.kind == "page" %}
+          <a href="{{ item.href }}">{{ item.title }}</a>
+          {% elif item.kind == "section" %}
+          <span class="nav-trigger">{{ item.title }} <span class="caret">&#9662;</span></span>
+          <ul class="dropdown">
+            {% for sub in item.items %}
+            <li><a href="{{ sub.href }}">{{ sub.title }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <main class="content {% block main_class %}{% endblock main_class %}">
+    {% block content %}{% endblock content %}
+  </main>
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('mkcdoc-theme', next);
+      // A reload (rather than just flipping the attribute) keeps Mermaid diagrams — which bake
+      // their theme in at render time and can't be re-themed in place — in sync with the rest
+      // of the page.
+      location.reload();
+    });
+  </script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+    mermaid.initialize({ startOnLoad: true, theme: theme });
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} · {{ site_name }}{% endblock title %}
+{% block main_class %}content-wide{% endblock main_class %}
+{% block content %}
+  <h1>{{ page_title }}</h1>
+
+  <div class="api-layout">
+    <nav class="api-toc">
+      <div class="toc-heading">Contents</div>
+      <ul>
+        {% for fg in file_groups %}
+        <li><a href="#{{ fg.anchor }}">{{ fg.file }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="api-body">
+      {% for fg in file_groups %}
+      <div class="file-group">
+        <h2 class="file-heading" id="{{ fg.anchor }}">{{ fg.file }}</h2>
+
+        {% if fg.functions %}
+        <h3 class="section">Functions</h3>
+        {% for f in fg.functions %}
+        <div class="item">
+          <h4>{{ f.name }}</h4>
+          <div class="loc">line {{ f.line }}</div>
+          <pre>{{ f.signature | safe }}</pre>
+          {% if f.brief %}<p class="brief">{{ f.brief }}</p>{% endif %}
+          {% if f.description %}<p>{{ f.description }}</p>{% endif %}
+          {% if f.params %}
+          <table>
+            {% for p in f.params %}
+            <tr><td class="mname">{{ p.name }}</td><td>{{ p.description }}</td></tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+          {% if f.returns %}<p><strong>Returns:</strong> {{ f.returns }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if fg.structs %}
+        <h3 class="section">Structs</h3>
+        {% for s in fg.structs %}
+        <div class="item" id="{{ s.anchor }}">
+          <h4>{{ s.name }}</h4>
+          <div class="loc">line {{ s.line }}</div>
+          {% if s.brief %}<p class="brief">{{ s.brief }}</p>{% endif %}
+          {% if s.description %}<p>{{ s.description }}</p>{% endif %}
+          {% if s.fields %}
+          <table>
+            {% for f in s.fields %}
+            <tr><td class="mtype">{{ f.type_text | safe }}</td><td>{{ f.brief | default(value="") }}</td></tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if fg.enums %}
+        <h3 class="section">Enums</h3>
+        {% for e in fg.enums %}
+        <div class="item" id="{{ e.anchor }}">
+          <h4>{{ e.name }}</h4>
+          <div class="loc">line {{ e.line }}</div>
+          {% if e.brief %}<p class="brief">{{ e.brief }}</p>{% endif %}
+          {% if e.description %}<p>{{ e.description }}</p>{% endif %}
+          {% if e.variants %}
+          <table>
+            {% for v in e.variants %}
+            <tr>
+              <td class="mname">{{ v.name }}{% if v.value %} = {{ v.value }}{% endif %}</td>
+              <td>{{ v.brief | default(value="") }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if fg.typedefs %}
+        <h3 class="section">Typedefs</h3>
+        {% for t in fg.typedefs %}
+        <div class="item" id="{{ t.anchor }}">
+          <h4>{{ t.name }}</h4>
+          <div class="loc">line {{ t.line }}</div>
+          <pre>{{ t.underlying | safe }}</pre>
+          {% if t.brief %}<p class="brief">{{ t.brief }}</p>{% endif %}
+          {% if t.description %}<p>{{ t.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if fg.macros %}
+        <h3 class="section">Macros</h3>
+        {% for m in fg.macros %}
+        <div class="item">
+          <h4>{{ m.name }}{% if m.params %}({{ m.params | join(sep=", ") }}){% endif %}</h4>
+          <div class="loc">line {{ m.line }}</div>
+          {% if m.value %}<pre>{{ m.value }}</pre>{% endif %}
+          {% if m.brief %}<p class="brief">{{ m.brief }}</p>{% endif %}
+          {% if m.description %}<p>{{ m.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

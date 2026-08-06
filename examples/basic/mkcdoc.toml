@@ -1,0 +1,26 @@
+[site]
+name = "mathutil docs"
+output_dir = "site"
+
+[source]
+dirs = ["src"]
+
+[content]
+dir = "content"
+
+[[nav]]
+type = "page"
+title = "Home"
+path = "index.md"
+
+[[nav]]
+type = "section"
+title = "Guide"
+items = [
+  { type = "page", title = "Installation", path = "guide/install.md" },
+  { type = "page", title = "Getting Started", path = "guide/getting-started.md" },
+]
+
+[[nav]]
+type = "api_reference"
+title = "API Reference"

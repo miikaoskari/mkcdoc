@@ -1,0 +1,16 @@
+[package]
+name = "mkcdoc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+notify = "8.2.0"
+pulldown-cmark = "0.13.4"
+serde = { version = "1.0.229", features = ["derive"] }
+tera = "2.1.0"
+tiny_http = "0.12.0"
+toml = "1.1.4"
+tree-sitter = "0.26.11"
+tree-sitter-c = "0.24.2"

@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} · {{ site_name }}{% endblock title %}
+{% block content %}
+{{ body_html | safe }}
+{% endblock content %}
