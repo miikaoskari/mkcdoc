@@ -304,6 +304,31 @@ fn render_nav_entries(
     Ok(())
 }
 
+/// Derives the `owner/repo` text shown next to the repo link when `site.repo_name` isn't set
+/// explicitly, from the last two non-empty path segments of `repo_url`.
+fn derive_repo_name(repo_url: &str) -> String {
+    let segments: Vec<&str> =
+        repo_url.trim_end_matches('/').split('/').filter(|s| !s.is_empty()).collect();
+    match segments.len() {
+        0 => repo_url.to_string(),
+        1 => segments[0].to_string(),
+        n => format!("{}/{}", segments[n - 2], segments[n - 1]),
+    }
+}
+
+fn base_context(cfg: &Config, nav: &[NavView], title: &str) -> tera::Context {
+    let mut ctx = tera::Context::new();
+    ctx.insert("site_name", &cfg.site.name);
+    ctx.insert("nav", nav);
+    ctx.insert("page_title", title);
+    if let Some(repo_url) = &cfg.site.repo_url {
+        ctx.insert("repo_url", repo_url);
+        let repo_name = cfg.site.repo_name.clone().unwrap_or_else(|| derive_repo_name(repo_url));
+        ctx.insert("repo_name", &repo_name);
+    }
+    ctx
+}
+
 fn render_content_page(
     tera: &Tera,
     nav: &[NavView],
@@ -313,10 +338,7 @@ fn render_content_page(
 ) -> Result<()> {
     let body_html = crate::content::render_markdown_file(&cfg.content.dir.join(rel_path))?;
 
-    let mut ctx = tera::Context::new();
-    ctx.insert("site_name", &cfg.site.name);
-    ctx.insert("nav", nav);
-    ctx.insert("page_title", title);
+    let mut ctx = base_context(cfg, nav, title);
     ctx.insert("body_html", &body_html);
 
     write_page(tera, "page.html", &ctx, &cfg.site.output_dir, &page_slug(rel_path))
@@ -330,10 +352,7 @@ fn render_api_page(
     title: &str,
     rel_path: &Path,
 ) -> Result<()> {
-    let mut ctx = tera::Context::new();
-    ctx.insert("site_name", &cfg.site.name);
-    ctx.insert("nav", nav);
-    ctx.insert("page_title", title);
+    let mut ctx = base_context(cfg, nav, title);
     ctx.insert("file_groups", &group_by_file(document));
 
     write_page(tera, "api.html", &ctx, &cfg.site.output_dir, &page_slug(rel_path))

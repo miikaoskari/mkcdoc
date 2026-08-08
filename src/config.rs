@@ -16,6 +16,14 @@ pub struct Config {
 pub struct SiteConfig {
     pub name: String,
     pub output_dir: PathBuf,
+    /// Link to the project's source repository, shown in the top navbar. When it points at
+    /// `github.com`, the page also fetches and displays live star/fork counts.
+    #[serde(default)]
+    pub repo_url: Option<String>,
+    /// Text shown next to the repo link, e.g. `owner/repo`. Defaults to the last two path
+    /// segments of `repo_url` when not set.
+    #[serde(default)]
+    pub repo_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

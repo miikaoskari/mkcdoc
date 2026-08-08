@@ -1,6 +1,7 @@
 [site]
 name = "mathutil docs"
 output_dir = "site"
+repo_url = "https://github.com/mkcdoc/mkcdoc"
 
 [source]
 dirs = ["src"]
