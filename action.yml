@@ -1,0 +1,20 @@
+name: 'mkcdoc'
+description: 'Generate a static docs site from Doxygen-style C comments and hand-written Markdown'
+author: 'miikaoskari'
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  config:
+    description: 'Path to mkcdoc.toml, relative to the repository root'
+    required: false
+    default: 'mkcdoc.toml'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - 'build'
+    - '--config'
+    - '${{ inputs.config }}'
