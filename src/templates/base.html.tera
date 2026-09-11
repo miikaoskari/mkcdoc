@@ -24,19 +24,29 @@
       --link: #0550ae;
       --code-bg: #f6f8fa;
       --shadow: rgba(0, 0, 0, 0.08);
+      --tok-keyword: #cf222e;
+      --tok-string: #0a3069;
+      --tok-number: #0550ae;
+      --tok-comment: #6e7781;
+      --tok-type: #953800;
+      --tok-function: #8250df;
+      --tok-property: #0550ae;
+      --tok-constant: #005cc5;
       color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
       /* No-JS fallback: honored only until the early script above sets data-theme explicitly,
          which the attribute selectors below then take over from (they win on specificity). */
-      :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --muted-subtle: #6e7681; --border: #30363d; --link: #6cb6ff; --code-bg: #161b22; --shadow: rgba(0, 0, 0, 0.5); color-scheme: dark; }
+      :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --muted-subtle: #6e7681; --border: #30363d; --link: #6cb6ff; --code-bg: #161b22; --shadow: rgba(0, 0, 0, 0.5); --tok-keyword: #ff7b72; --tok-string: #a5d6ff; --tok-number: #79c0ff; --tok-comment: #8b949e; --tok-type: #ffa657; --tok-function: #d2a8ff; --tok-property: #79c0ff; --tok-constant: #79c0ff; color-scheme: dark; }
     }
     :root[data-theme="dark"] {
       --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --muted-subtle: #6e7681; --border: #30363d; --link: #6cb6ff; --code-bg: #161b22; --shadow: rgba(0, 0, 0, 0.5);
+      --tok-keyword: #ff7b72; --tok-string: #a5d6ff; --tok-number: #79c0ff; --tok-comment: #8b949e; --tok-type: #ffa657; --tok-function: #d2a8ff; --tok-property: #79c0ff; --tok-constant: #79c0ff;
       color-scheme: dark;
     }
     :root[data-theme="light"] {
       --bg: #ffffff; --fg: #1a1a1a; --muted: #57606a; --muted-subtle: #888888; --border: #e2e2e2; --link: #0550ae; --code-bg: #f6f8fa; --shadow: rgba(0, 0, 0, 0.08);
+      --tok-keyword: #cf222e; --tok-string: #0a3069; --tok-number: #0550ae; --tok-comment: #6e7781; --tok-type: #953800; --tok-function: #8250df; --tok-property: #0550ae; --tok-constant: #005cc5;
       color-scheme: light;
     }
 
@@ -112,8 +122,17 @@
     .item td.mtype { font-family: ui-monospace, monospace; color: var(--muted); white-space: nowrap; }
     main.content pre { background: var(--code-bg); padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
     main.content code { background: var(--code-bg); padding: 0.1rem 0.3rem; border-radius: 4px; }
+    main.content pre code { background: none; padding: 0; border-radius: 0; }
     main.content pre.mermaid { background: transparent; padding: 0; text-align: center; overflow-x: auto; }
     main.content img { max-width: 100%; }
+    .tok-keyword { color: var(--tok-keyword); }
+    .tok-string { color: var(--tok-string); }
+    .tok-number { color: var(--tok-number); }
+    .tok-comment { color: var(--tok-comment); font-style: italic; }
+    .tok-type { color: var(--tok-type); }
+    .tok-function, .tok-function-special { color: var(--tok-function); }
+    .tok-property { color: var(--tok-property); }
+    .tok-constant { color: var(--tok-constant); }
   </style>
 </head>
 <body>
