@@ -13,7 +13,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/miikaoskari/mkcdoc:1'
+  image: 'docker://ghcr.io/miikaoskari/mkcdoc@sha256:b0fd383678152348d1df7901968b3b58a92fd6e9cc2f8fc4bb9666bbe3101555'
   args:
     - 'build'
     - '--config'
