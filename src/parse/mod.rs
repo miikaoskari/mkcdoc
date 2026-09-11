@@ -118,21 +118,29 @@ fn type_definition_from(node: Node, source: &str, path: &Path, out: &mut SourceF
     let Some(type_node) = node.child_by_field_name("type") else {
         return;
     };
+    // Only treat the typedef as introducing an inline struct/union/enum (`typedef struct { ... }
+    // Name;`) when the specifier actually has a body. A bare tag reference (`typedef struct
+    // foo_s foo_t;`) defines no new aggregate — it's a plain alias, and the tagged type (if
+    // defined at all) is picked up separately wherever its own body appears.
     match type_node.kind() {
-        "struct_specifier" | "union_specifier" => out.structs.push(Struct {
-            name,
-            fields: extract_fields(type_node, source),
-            doc,
-            file,
-            line,
-        }),
-        "enum_specifier" => out.enums.push(Enum {
-            name,
-            variants: extract_variants(type_node, source),
-            doc,
-            file,
-            line,
-        }),
+        "struct_specifier" | "union_specifier" if type_node.child_by_field_name("body").is_some() => {
+            out.structs.push(Struct {
+                name,
+                fields: extract_fields(type_node, source),
+                doc,
+                file,
+                line,
+            })
+        }
+        "enum_specifier" if type_node.child_by_field_name("body").is_some() => {
+            out.enums.push(Enum {
+                name,
+                variants: extract_variants(type_node, source),
+                doc,
+                file,
+                line,
+            })
+        }
         _ => out.typedefs.push(Typedef {
             name,
             underlying: signature_text(node, source),
@@ -437,6 +445,37 @@ typedef enum {
         assert_eq!(sf.typedefs.len(), 1);
         assert_eq!(sf.typedefs[0].name, "Callback");
         assert_eq!(sf.typedefs[0].underlying, "typedef int (*Callback)(int, int)");
+    }
+
+    #[test]
+    fn typedef_of_bare_struct_tag_is_a_typedef_not_an_empty_struct() {
+        let sf = parse(
+            r#"
+typedef struct mlg_hash_head_s mlg_hash_head_t;
+typedef struct mlg_hash_node_s mlg_hash_node_t;
+typedef struct mlg_hash_table_s mlg_hash_table_t;
+typedef size_t (*mlg_hash_key_cb)(mlg_hash_node_t *node);
+
+struct mlg_hash_head_s
+{
+    mlg_hash_node_t *first;
+};
+"#,
+        );
+        assert_eq!(sf.typedefs.len(), 4);
+        assert_eq!(
+            sf.typedefs.iter().map(|t| t.name.as_str()).collect::<Vec<_>>(),
+            ["mlg_hash_head_t", "mlg_hash_node_t", "mlg_hash_table_t", "mlg_hash_key_cb"]
+        );
+        assert_eq!(
+            sf.typedefs[0].underlying,
+            "typedef struct mlg_hash_head_s mlg_hash_head_t"
+        );
+        // The tagged struct itself is still picked up, under its own tag name, with its fields.
+        assert_eq!(sf.structs.len(), 1);
+        assert_eq!(sf.structs[0].name, "mlg_hash_head_s");
+        assert_eq!(sf.structs[0].fields.len(), 1);
+        assert_eq!(sf.structs[0].fields[0].name, "first");
     }
 }
 
